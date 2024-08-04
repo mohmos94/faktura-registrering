@@ -1,24 +1,32 @@
-import React from 'react';
-import logo from './logo.svg';
+// src/App.tsx
+import React, { useEffect } from 'react';
 import './App.css';
+import { fetchBrregData } from './service/BrregApi'; // Import the fetch function
+import { BrregEnhet } from './service/Interface'; // Import the interface
+import Invoice from './components/invoice/Invoice';
+import Header from './components/main/Header';
+import Footer from './components/main/Footer';
+import { Container } from '@mui/material';
 
 function App() {
+  useEffect(() => {
+    const orgnr = '916880928'; // Example organization number
+    fetchBrregData(orgnr)
+      .then((data: BrregEnhet) => {
+        console.log('Fetched Brreg Data:', data); // Log the fetched data
+      })
+      .catch((error) => {
+        console.error('Error fetching Brreg data:', error);
+      });
+  }, []); // Empty dependency array means this effect runs once on mount
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Container>
+        <Header />
+        <Invoice />
+        <Footer />
+      </Container>
     </div>
   );
 }
