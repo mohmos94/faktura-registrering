@@ -1,34 +1,59 @@
 // src/App.tsx
-import React, { useEffect } from 'react';
-import './App.css';
-import { fetchBrregData } from './service/BrregApi'; // Import the fetch function
-import { BrregEnhet } from './service/Interface'; // Import the interface
-import Invoice from './components/invoice/Invoice';
-import Header from './components/main/Header';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Navbar from './components/main/Navbar';
+import MainPage from './components/main/MainPage';
+import IntroductionPage from './components/main/IntroductionPage';
+import ContactPage from './components/main/ContactPage';
+import ProfilePage from './components/main/ProfilePage';
 import Footer from './components/main/Footer';
-import { Container } from '@mui/material';
-
-function App() {
-  useEffect(() => {
-    const orgnr = '916880928'; // Example organization number
-    fetchBrregData(orgnr)
-      .then((data: BrregEnhet) => {
-        console.log('Fetched Brreg Data:', data); // Log the fetched data
-      })
-      .catch((error) => {
-        console.error('Error fetching Brreg data:', error);
-      });
-  }, []); // Empty dependency array means this effect runs once on mount
-
+import { SignedIn, SignedOut } from '@clerk/clerk-react';
+import './App.css';  // Ensure this line is present to include your CSS
+import CreateInvoice from './components/invoice/guide/CreateInvoice';
+import ManageInvoice from './components/invoice/guide/ManageInvoice';
+import SendInvoice from './components/invoice/guide/SendInvoice';
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <Container>
-        <Header />
-        <Invoice />
+    <div className="app-container">
+      <Router>
+        <Navbar />
+        <div className="content-wrap">
+          <Routes>
+            <Route path="/" element={<IntroductionPage />} />
+            <Route path="/create/invoice" element={<CreateInvoice />} />
+            <Route path="/manage/invoice" element={<ManageInvoice />} />
+            <Route path="/send/invoice" element={<SendInvoice />} />
+            <Route
+              path="/main"
+              element={
+                <SignedIn>
+                  <MainPage />
+                </SignedIn>
+              }
+            />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route
+              path="/profile"
+              element={
+                <SignedIn>
+                  <ProfilePage />
+                </SignedIn>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <SignedOut>
+                  <IntroductionPage />
+                </SignedOut>
+              }
+            />
+          </Routes>
+        </div>
         <Footer />
-      </Container>
+      </Router>
     </div>
   );
-}
+};
 
 export default App;
