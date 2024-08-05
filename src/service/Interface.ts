@@ -65,3 +65,23 @@ export interface fakturaInformasjon {
     pris: number;        // Price per item
     mva: number;         // VAT rate for the item or service
 }
+
+
+
+
+export interface BrukerDTO {
+    fornavn: string;
+    etternavn: string;
+    epost: string;
+    telefonnummer: string;
+}
+
+export interface Organisasjon {
+    organisasjonsnummer: string;
+    navn: string;
+    organisasjonsformKode: string;
+    registreringsdato: string;
+    stiftelsesdato: string;
+    institusjonellSektorkodeKode: string;
+    maalform: string;
+}

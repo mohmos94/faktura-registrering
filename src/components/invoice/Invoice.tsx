@@ -2,13 +2,13 @@
 
 import React, { useState } from 'react';
 import { Grid, Paper, Typography, Box, TextField, Button, Divider } from '@mui/material';
-import InvoiceDetails from './InvoiceDetails';
 import InvoiceItems from './InvoiceItems';
 import PaymentInfo from './PaymentInfo';
 import { fetchBrregData } from '../../service/BrregApi';
-import { BrregEnhet, fakturaInformasjon } from '../../service/Interface'; // Use the correct import
+import { BrregEnhet, fakturaInformasjon } from '../../service/Interface';
 import { validateInputs } from '../../util/validation';
 import { calculateSubtotal, calculateTotalVat, calculateTotal, formatDate } from '../../util/calculations';
+import { useAuthToken } from '../../service/useAuthToken';
 
 interface Errors {
     accountNumber: string;
@@ -23,6 +23,7 @@ interface Errors {
 }
 
 const Invoice: React.FC = () => {
+    const { getAuthToken } = useAuthToken();
     const [orgNumber, setOrgNumber] = useState('');
     const [organization, setOrganization] = useState<BrregEnhet | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -37,7 +38,7 @@ const Invoice: React.FC = () => {
     const [currentInvoiceNumber, setCurrentInvoiceNumber] = useState('');
     const [currentInvoiceDate, setCurrentInvoiceDate] = useState('');
 
-    const [invoiceItems, setInvoiceItems] = useState<fakturaInformasjon[]>([]); // Correctly use fakturaInformasjon
+    const [invoiceItems, setInvoiceItems] = useState<fakturaInformasjon[]>([]);
     const [editMode, setEditMode] = useState(false);
 
     const [errors, setErrors] = useState<Errors>({
@@ -54,7 +55,16 @@ const Invoice: React.FC = () => {
 
     const handleFetchOrganization = async () => {
         try {
-            const data = await fetchBrregData(orgNumber);
+            const token = await getAuthToken();
+            console.log("hello world")
+            console.log("token: " + token)
+
+            if (!token) {
+                setError('User is not authenticated.');
+                return;
+            }
+
+            const data = await fetchBrregData(orgNumber, token);
             setOrganization(data);
             setError(null);
         } catch (error) {
@@ -83,7 +93,7 @@ const Invoice: React.FC = () => {
         setInvoiceItems((prevItems) => [
             ...prevItems,
             {
-                beskrivelse: currentDescription, // Correctly map to fakturaInformasjon properties
+                beskrivelse: currentDescription,
                 antall: currentQuantity,
                 pris: currentPrice,
                 mva: currentVatRate,
@@ -100,7 +110,6 @@ const Invoice: React.FC = () => {
         setInvoiceItems((prevItems) => prevItems.filter((_, i) => i !== index));
     };
 
-    // Use calculations
     const subtotal = calculateSubtotal(invoiceItems) || 0;
     const totalVat = calculateTotalVat(invoiceItems) || 0;
     const total = calculateTotal(invoiceItems) || 0;
