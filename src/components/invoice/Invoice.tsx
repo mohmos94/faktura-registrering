@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { Grid, Paper, Typography, Box, TextField, Button, Divider } from '@mui/material';
 import InvoiceItems from './InvoiceItems';
 import PaymentInfo from './PaymentInfo';
-import { fetchBrregData } from '../../service/BrregApi';
-import { BrregEnhet, fakturaInformasjon } from '../../service/Interface';
+import { createFaktura, fetchBrregData } from '../../service/API';
+import { BrregEnhet, Faktura, fakturaInformasjon } from '../../service/Interface';
 import { validateInputs } from '../../util/validation';
 import { calculateSubtotal, calculateTotalVat, calculateTotal, formatDate } from '../../util/calculations';
 import { useAuthToken } from '../../service/useAuthToken';
@@ -121,20 +121,50 @@ const Invoice: React.FC = () => {
         setter(dateValue);
     };
 
-    const handleSendInvoice = () => {
-        const invoiceData = {
-            organization: organization,
-            accountNumber: currentAccountNumber,
-            kidNumber: currentKidNumber,
-            dueDate: formatDate(currentDueDate),
-            invoiceNumber: currentInvoiceNumber,
-            invoiceDate: formatDate(currentInvoiceDate),
-            items: invoiceItems,
-        };
+    const handleSendInvoice = async () => {
+        try {
+            const token = await getAuthToken();
 
-        console.log('Sending invoice data:', invoiceData);
-        alert('Invoice data has been saved (simulated).');
+            if (!token) {
+                setError('User is not authenticated.');
+                return;
+            }
+
+            const invoiceData: Faktura = {
+                fakturanummer: currentInvoiceNumber,
+                fakturadato: formatDate(currentInvoiceDate),
+                forfallsdato: formatDate(currentDueDate),
+                sumEksMva: subtotal,
+                mvaBelop: totalVat,
+                totalBelop: total,
+                avsenderOrganisasjonsnummer: "123456789", // Sett til avsenders organisasjonsnummer
+                mottakerOrganisasjonsnummer: organization ? organization.organisasjonsnummer : '',
+                kontonummer: currentAccountNumber,
+                kidNummer: currentKidNumber,
+                kundenavn: organization ? organization.navn : '',
+                postadresse: organization ? organization.forretningsadresse.adresse.join(', ') : '',
+                postnummerSted: organization ? `${organization.forretningsadresse.postnummer} ${organization.forretningsadresse.poststed}` : '',
+                fakturaLinjer: invoiceItems.map(item => ({
+                    fakturanummer: currentInvoiceNumber,
+                    varebeskrivelse: item.beskrivelse,
+                    antall: item.antall,
+                    prisPerEnhet: item.pris,
+                    mvaSats: item.mva,
+                })),
+            };
+
+            console.log("Invoice data: " + JSON.stringify(invoiceData, null, 2));
+
+            const response = await createFaktura(invoiceData, token);
+
+            console.log('Invoice successfully saved:', response);
+            alert('Invoice successfully saved.');
+        } catch (error) {
+            console.error('Error sending invoice:', error);
+            setError(error instanceof Error ? error.message : 'Ukjent feil ved sending av faktura');
+        }
     };
+
 
     return (
         <Paper elevation={3} style={{ padding: '16px', margin: '20px 0' }}>

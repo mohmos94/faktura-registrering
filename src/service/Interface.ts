@@ -85,3 +85,47 @@ export interface Organisasjon {
     institusjonellSektorkodeKode: string;
     maalform: string;
 }
+
+// Interface for Faktura
+export interface Faktura {
+    fakturanummer: string;
+    fakturadato: string;
+    forfallsdato: string;
+    sumEksMva: number;
+    mvaBelop: number;
+    totalBelop: number;
+    avsenderOrganisasjonsnummer: string;
+    mottakerOrganisasjonsnummer: string;
+    kontonummer: string;
+    kidNummer?: string;
+    kundenavn: string;
+    postadresse: string;
+    postnummerSted: string;
+    fakturaLinjer: FakturaLinje[];
+}
+
+
+// Interface for FakturaLinje (Invoice Line)
+export interface FakturaLinje {
+    fakturanummer: string;
+    varebeskrivelse: string;
+    antall: number;
+    prisPerEnhet: number;
+    mvaSats: number;
+}
+
+
+// Interface for Payment Information
+export interface Betalingsinformasjon {
+    kontonummer: string;
+    fakturanummer: string;
+    forfallsdato: string;
+}
+
+// Interface for Invoice Information (can be part of FakturaLinje)
+export interface fakturaInformasjon {
+    beskrivelse: string;
+    antall: number;
+    pris: number;
+    mva: number;
+}

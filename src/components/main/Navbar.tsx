@@ -4,7 +4,7 @@ import { AppBar, Toolbar, Typography, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { SignedIn, SignedOut, SignInButton, UserButton, useAuth, useClerk } from '@clerk/clerk-react';
 import { Link } from 'react-router-dom';
-import { getUserByemail, registerUser } from '../../service/BrregApi'; // Import your registerUser function
+import { getUserByemail, registerUser } from '../../service/API'; // Import your registerUser function
 import { BrukerDTO } from '../../service/Interface'; // Import the BrukerDTO interface
 import { useAuthToken } from '../../service/useAuthToken';
 
