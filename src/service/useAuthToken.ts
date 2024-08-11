@@ -1,14 +1,13 @@
-// src/hooks/useAuthToken.ts
 import { useSession } from '@clerk/clerk-react';
+import { useCallback } from 'react';
 
 export const useAuthToken = () => {
     const { isLoaded, session, isSignedIn } = useSession();
 
-    // Function to retrieve the token
-    const getAuthToken = async () => {
+    // Memoize the function to avoid re-creating on every render
+    const getAuthToken = useCallback(async () => {
         if (session) {
             try {
-                // Retrieve the JWT token
                 const token = await session.getToken();
                 return token;
             } catch (error) {
@@ -17,7 +16,7 @@ export const useAuthToken = () => {
             }
         }
         return null;
-    };
+    }, [session]);
 
     return { getAuthToken, isLoaded, isSignedIn };
 };

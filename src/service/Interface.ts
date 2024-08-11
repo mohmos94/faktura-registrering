@@ -21,6 +21,11 @@ export interface BrregEnhet {
     aktivitet: string[]; // List of activities
 }
 
+export interface Organization {
+    organisasjonsnummer: string; // Organization number
+    navn: string; // Name of the organization
+}
+
 // Interface for organizational form
 export interface Organisasjonsform {
     kode: string; // Code for organization form
@@ -101,6 +106,7 @@ export interface Faktura {
     kundenavn: string;
     postadresse: string;
     postnummerSted: string;
+    notat: string;
     fakturaLinjer: FakturaLinje[];
 }
 

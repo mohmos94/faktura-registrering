@@ -151,6 +151,7 @@ const Invoice: React.FC = () => {
                     prisPerEnhet: item.pris,
                     mvaSats: item.mva,
                 })),
+                notat: '' // Sett til en standardverdi eller inkluder en input fra brukeren
             };
 
             console.log("Invoice data: " + JSON.stringify(invoiceData, null, 2));
@@ -158,12 +159,38 @@ const Invoice: React.FC = () => {
             const response = await createFaktura(invoiceData, token);
 
             console.log('Invoice successfully saved:', response);
-            alert('Invoice successfully saved.');
+
+            // Tilbakestill alle tilstandsvariabler til sine opprinnelige verdier
+            setOrgNumber('');
+            setOrganization(null);
+            setCurrentAccountNumber('');
+            setCurrentKidNumber('');
+            setCurrentDueDate('');
+            setCurrentDescription('');
+            setCurrentQuantity(1);
+            setCurrentPrice(0);
+            setCurrentVatRate(25);
+            setCurrentInvoiceNumber('');
+            setCurrentInvoiceDate('');
+            setInvoiceItems([]);
+            setErrors({
+                accountNumber: '',
+                kidNumber: '',
+                dueDate: '',
+                description: '',
+                quantity: '',
+                price: '',
+                vatRate: '',
+                invoiceNumber: '',
+                invoiceDate: '',
+            });
+
         } catch (error) {
             console.error('Error sending invoice:', error);
             setError(error instanceof Error ? error.message : 'Ukjent feil ved sending av faktura');
         }
     };
+
 
 
     return (

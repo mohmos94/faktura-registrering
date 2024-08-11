@@ -53,14 +53,14 @@ const Navbar: React.FC = () => {
                     </Link>
                 </Typography>
                 <Link to="/main" style={{ color: 'inherit', textDecoration: 'none', marginRight: '16px' }}>
-                    Main
+                    INVOICE
                 </Link>
                 <Link to="/contact" style={{ color: 'inherit', textDecoration: 'none', marginRight: '16px' }}>
-                    Contact
+                    CONTACT
                 </Link>
                 <SignedIn>
                     <Link to="/profile" style={{ color: 'inherit', textDecoration: 'none', marginRight: '16px' }}>
-                        Profile
+                        PROFILE
                     </Link>
                     <UserButton />
                 </SignedIn>

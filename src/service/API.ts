@@ -1,4 +1,3 @@
-// src/service/BrregApi.ts
 import { BrregEnhet, Faktura, FakturaLinje } from './Interface'; // Assuming BrregEnhet is the appropriate interface for the response
 import { BrukerDTO } from './Interface';
 import { Organisasjon } from './Interface'; // Assuming Organisasjon is defined
@@ -32,6 +31,62 @@ export async function fetchBrregData(orgnr: string, token: string): Promise<Brre
         }
     }
 }
+
+export async function saveOrganization(orgnr: string, token: string): Promise<BrregEnhet> {
+    try {
+        const response = await fetch(`${BASE_URL}brreg/organisation/orgnr/${orgnr}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // Include JWT in request
+            }
+        });
+
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`Feil med lagring av organisasjonsdata: ${errorMessage}`);
+        }
+
+        const data = await response.json();
+        console.log("json data:" + response.headers)
+        return data as BrregEnhet;
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(`Feil med henting av organisasjonsdata: ${error.message}`);
+        } else {
+            throw new Error(`Ukjent feil med henting av organisasjonsdata`);
+        }
+    }
+}
+
+
+export async function getOrganisationName(orgnr: string, token: string): Promise<Organisasjon> {
+    try {
+        const response = await fetch(`${BASE_URL}brreg/${orgnr}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // Include JWT in request
+            }
+        });
+
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`Feil med henting av organisasjonsdata: ${errorMessage}`);
+        }
+
+        const data = await response.json();
+        console.log("json data:" + response.headers)
+        return data as Organisasjon;
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(`Feil med henting av organisasjonsdata: ${error.message}`);
+        } else {
+            throw new Error(`Ukjent feil med henting av organisasjonsdata`);
+        }
+    }
+}
+
 
 
 
@@ -125,7 +180,7 @@ export async function createOrganisasjon(organisasjon: Organisasjon, token: stri
 
 
 // Function to create a new Faktura
-export async function createFaktura(faktura: Faktura, token: string): Promise<Faktura> {
+export async function createFaktura(faktura: Faktura, token: string): Promise<void> {
     try {
         const response = await fetch(`${BASE_URL}fakturaer`, {
             method: 'POST',
@@ -138,13 +193,15 @@ export async function createFaktura(faktura: Faktura, token: string): Promise<Fa
 
         console.log("body: " + faktura)
         console.log("fakura sendt: " + response)
+
         if (!response.ok) {
             const errorMessage = await response.text();
             throw new Error(`Feil ved oppretting av faktura: ${errorMessage}`);
         }
 
-        const data = await response.json();
-        return data as Faktura;
+        const data = await response.text();
+        alert(data);
+
     } catch (error) {
         if (error instanceof Error) {
             throw new Error(`Feil ved oppretting av faktura: ${error.message}`);
@@ -164,6 +221,8 @@ export async function getFakturaByOrgNummer(orgnr: string, token: string): Promi
                 'Authorization': `Bearer ${token}` // Include JWT in request
             }
         });
+
+        console.log("mosti er dum ")
 
         if (!response.ok) {
             const errorMessage = await response.text();
@@ -239,4 +298,59 @@ export async function getFakturaLinjerByFakturaNummer(fakturanummer: string, tok
     }
 }
 
+export async function oppdaterNotatFelt(fakturanummer: string, notat: string, token: string): Promise<boolean> {
+    try {
+        const response = await fetch(`${BASE_URL}fakturaer/oppdater/fakturanr/${fakturanummer}/notat`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ notat }) // Sender notatet som JSON i body
+        });
+
+        console.log("mosti sender en notat")
+
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`Feil ved oppdatering av notat: ${errorMessage}`);
+        }
+
+        return true; // Returner true hvis oppdateringen var vellykket
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(`Feil ved oppdatering av notat: ${error.message}`);
+        } else {
+            throw new Error(`Ukjent feil ved oppdatering av notat`);
+        }
+    }
+}
+
+
+// Function to get Faktura by fakturanummer
+export async function getFakturaByFakturaNummer(fakturanummer: string, token: string): Promise<Faktura> {
+    try {
+        const response = await fetch(`${BASE_URL}fakturaer/org/fakturanr/${fakturanummer}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`Feil ved henting av faktura: ${errorMessage}`);
+        }
+
+        const data = await response.json();
+        return data as Faktura;
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(`Feil ved henting av faktura: ${error.message}`);
+        } else {
+            throw new Error(`Ukjent feil ved henting av faktura`);
+        }
+    }
+}
 

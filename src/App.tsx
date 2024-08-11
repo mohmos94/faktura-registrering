@@ -12,6 +12,8 @@ import CreateInvoice from './components/invoice/guide/CreateInvoice';
 import ManageInvoice from './components/invoice/guide/ManageInvoice';
 import SendInvoice from './components/invoice/guide/SendInvoice';
 import './App.css';
+import InvoiceDetails from './components/invoice/InvoiceDetails';
+import InvoiceDetail from './components/invoice/InvoiceDetail';
 
 const App: React.FC = () => {
   return (
@@ -24,6 +26,9 @@ const App: React.FC = () => {
             <Route path="/create/invoice" element={<CreateInvoice />} />
             <Route path="/manage/invoice" element={<ManageInvoice />} />
             <Route path="/send/invoice" element={<SendInvoice />} />
+            <Route path="/invoices/:orgNum" element={<InvoiceDetails />} />
+            <Route path="/faktura/:fakturanummer" element={<InvoiceDetail />} />
+
             <Route
               path="/main"
               element={

@@ -1,11 +1,54 @@
-// src/pages/ProfilePage.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { Container, Typography, Box, Button, Avatar, List, ListItem, ListItemText, Divider } from '@mui/material';
+import { getFakturaByOrgNummer, getOrganisationName } from '../../service/API'; // Import the function to fetch invoices
+import { Faktura, Organisasjon } from '../../service/Interface'; // Import the Faktura interface
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 
 const ProfilePage: React.FC = () => {
     const { user } = useUser();
     const clerk = useClerk();
+    const [invoices, setInvoices] = useState<Faktura[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const [organization, setOrganization] = useState<Organisasjon | null>(null);
+
+    // Grouped invoices by mottakerOrganisasjonsnummer
+    const groupedInvoices = invoices.reduce((acc, invoice) => {
+        const key = invoice.mottakerOrganisasjonsnummer;
+        if (!acc[key]) {
+            acc[key] = [];
+        }
+        acc[key].push(invoice);
+        return acc;
+    }, {} as Record<string, Faktura[]>);
+
+    useEffect(() => {
+        const fetchInvoices = async () => {
+            if (user && user.publicMetadata && user.publicMetadata.organisasjonsnummer) {
+                const orgNummer = user.publicMetadata.organisasjonsnummer as string;
+                const token = await clerk.session?.getToken();
+
+                if (token) {
+                    try {
+                        const fetchedInvoices = await getFakturaByOrgNummer(orgNummer, token);
+                        setInvoices(fetchedInvoices);
+                    } catch (err) {
+                        setError('An error occurred while fetching invoices.');
+                    }
+                } else {
+                    setError('Unable to authenticate.');
+                }
+            } else {
+                setError('Organization number not found.');
+            }
+            setLoading(false);
+        };
+
+        fetchInvoices();
+    }, [user, clerk]);
+
+
 
     const handleDeleteAccount = async () => {
         const confirmDelete = window.confirm('Are you sure you want to delete your account? This action cannot be undone.');
@@ -20,15 +63,13 @@ const ProfilePage: React.FC = () => {
         }
     };
 
-    // Dummy data for invoices
-    const createdInvoices = [
-        { id: 1, title: 'Invoice 001', date: '2024-08-01' },
-        { id: 2, title: 'Invoice 002', date: '2024-08-02' },
-    ];
+    if (loading) {
+        return <Typography variant="body1">Loading invoices...</Typography>;
+    }
 
-    const approvedInvoices = [
-        { id: 1, title: 'Invoice 101', date: '2024-07-25' },
-    ];
+    if (error) {
+        return <Typography variant="body1" color="error">{error}</Typography>;
+    }
 
     if (!user) {
         return <Typography variant="body1">User not found. Please log in again.</Typography>;
@@ -58,29 +99,14 @@ const ProfilePage: React.FC = () => {
                 <Divider />
                 <Box mt={4}>
                     <Typography variant="h5" gutterBottom>
-                        Created Invoices
+                        Invoices by Organization
                     </Typography>
                     <List>
-                        {createdInvoices.map(invoice => (
-                            <ListItem key={invoice.id}>
+                        {Object.entries(groupedInvoices).map(([orgNum, invoices]) => (
+                            <ListItem key={orgNum} button component={Link} to={`/invoices/${orgNum}`}>
                                 <ListItemText
-                                    primary={invoice.title}
-                                    secondary={`Date: ${invoice.date}`}
-                                />
-                            </ListItem>
-                        ))}
-                    </List>
-                </Box>
-                <Box mt={4}>
-                    <Typography variant="h5" gutterBottom>
-                        Approved Invoices
-                    </Typography>
-                    <List>
-                        {approvedInvoices.map(invoice => (
-                            <ListItem key={invoice.id}>
-                                <ListItemText
-                                    primary={invoice.title}
-                                    secondary={`Date: ${invoice.date}`}
+                                    primary={`Organization ${orgNum}`}
+                                    secondary={`${invoices.length} invoice(s)`}
                                 />
                             </ListItem>
                         ))}
